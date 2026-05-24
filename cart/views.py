@@ -50,6 +50,14 @@ class AddToCartView(View):
         )
 
         if flavor_ids:
+            count = len(flavor_ids)
+            per_flavor_qty = item.quantity // count if count else 0
+            flavor_map = {}
+            for fid in flavor_ids:
+                flavor_map[str(fid)] = per_flavor_qty
+
+            request.session[f'cart_item_{cart_item.id}_split'] = flavor_map
+
             cart_item.flavors.set(flavor_ids)
 
         cart_item.save()
@@ -59,21 +67,14 @@ class AddToCartView(View):
             "cart_count": CartItem.objects.filter(cart=cart).count()
         })
 
-
 class RemoveCartItemView(View):
 
     def post(self, request):
-
         item_id = request.POST.get('item_id')
-
         cart_id = request.session.get('cart_id')
-
         cart_item = get_object_or_404(CartItem, id=item_id, cart_id=cart_id)
-
         cart_item.delete()
-
         cart_count = CartItem.objects.filter(cart_id=cart_id).count()
-
         return JsonResponse({
             'status': 'success',
             'cart_count': cart_count
@@ -81,16 +82,24 @@ class RemoveCartItemView(View):
 
 
 class CartView(View):
+
     template_name = 'cart.html'
 
     def get(self, request):
 
         cart_items = []
-
         cart_id = request.session.get('cart_id')
-
+        flavor_map = {}
         if cart_id:
-            cart_items = CartItem.objects.filter(cart_id=cart_id).prefetch_related('flavors', 'item')
+            cart_items = CartItem.objects.filter(
+                cart_id=cart_id
+            ).prefetch_related('flavors', 'item')
+            for item in cart_items:
+                split = request.session.get(
+                    f'cart_item_{item.id}_split',
+                    {}
+                )
+                flavor_map[item.id] = split
 
         total = 0
 
@@ -99,5 +108,6 @@ class CartView(View):
 
         return render(request, self.template_name, {
             'cart_items': cart_items,
-            'total': total
+            'total': total,
+            'flavor_map': flavor_map
         })

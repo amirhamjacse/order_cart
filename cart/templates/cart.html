@@ -135,11 +135,8 @@
 
                         <div class="col-md-3 text-center">
 
-                            <img
-                                src="https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=1200"
-                                class="food-image"
-                                alt="food"
-                            >
+                            <img src="https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=1200"
+                                 class="food-image">
 
                         </div>
 
@@ -158,9 +155,25 @@
 
                                 {% for flavor in cart_item.flavors.all %}
 
-                                    <span class="flavor-badge">
-                                        {{ flavor.name }}
-                                    </span>
+                                    {% for k, v in flavor_map.items %}
+
+                                        {% if k == cart_item.id|stringformat:"s" or k == cart_item.id %}
+
+                                            {% for fid, qty in v.items %}
+
+                                                {% if fid == flavor.id|stringformat:"s" or fid == flavor.id %}
+
+                                                    <span class="flavor-badge">
+                                                        {{ qty }}x {{ flavor.name }}
+                                                    </span>
+
+                                                {% endif %}
+
+                                            {% endfor %}
+
+                                        {% endif %}
+
+                                    {% endfor %}
 
                                 {% endfor %}
 
@@ -174,10 +187,8 @@
                                 ${{ cart_item.item.price }}
                             </div>
 
-                            <button
-                                class="btn btn-outline-danger btn-sm remove-btn"
-                                data-id="{{ cart_item.id }}"
-                            >
+                            <button class="btn btn-outline-danger btn-sm remove-btn"
+                                    data-id="{{ cart_item.id }}">
                                 Remove
                             </button>
 
@@ -205,29 +216,20 @@
                     </h3>
 
                     <div class="d-flex justify-content-between mb-3">
-
                         <span>Total Items</span>
-
                         <strong>{{ cart_items|length }}</strong>
-
                     </div>
 
                     <div class="d-flex justify-content-between mb-3">
-
                         <span>Delivery</span>
-
                         <strong>Free</strong>
-
                     </div>
 
                     <hr>
 
                     <div class="d-flex justify-content-between mb-4">
-
                         <h4>Total</h4>
-
                         <h4>${{ total_price }}</h4>
-
                     </div>
 
                     <button class="btn btn-light w-100 checkout-btn">
@@ -265,7 +267,6 @@ function getCSRF(){
     return '{{ csrf_token }}'
 }
 
-
 $('.remove-btn').click(function(){
 
     let btn = $(this)
@@ -284,9 +285,7 @@ $('.remove-btn').click(function(){
         success: function(res){
 
             if(res.status === "success"){
-
                 btn.closest('.cart-card').remove()
-
             }
 
         }

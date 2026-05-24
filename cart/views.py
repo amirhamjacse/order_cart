@@ -1,9 +1,7 @@
 from django.shortcuts import render, get_object_or_404
-
 # Create your views here.
 from django.http import JsonResponse
 from django.views import View
-
 from .models import MenuItem, Cart, CartItem
 
 
